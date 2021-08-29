@@ -1,23 +1,50 @@
-import logo from './logo.svg';
+// import axios from 'axios';
+import axios from 'axios';
+import {Fragment, useEffect, useState} from 'react';
 import './App.css';
+import Coin from './components/Coin/Coin';
+const URL = `https://api.coingecko.com/api/v3/coins/markets?vs_currency=NGN&order=market_cap_desc&per_page=100&page=1&sparkline=false`;
 
 function App() {
+  const [coins, setCoins] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+  
+  useEffect(()=>{
+    axios.get(URL)
+    .then(res =>{
+      console.log(res.data);
+      setCoins(res.data);
+      setLoading(false)
+    })
+    .catch(err =>{
+      console.error(err);
+    })
+  },[]);
+
+const searchEvent = e =>{
+  setSearch(e.target.value)
+}
+
+const filteredCoins = coins.filter(coin => coin.name.toLowerCase().includes(search.toLocaleLowerCase()));
+
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div >
+      <div className="header">
+        <h1 className="brand"> <i className="fas fa-moon"></i> CoinMoon</h1>
+        <form >
+            <input type="text" value={search} onChange={searchEvent} className="inputField" placeholder="Search A Coin" />
+        </form>
+      </div>
+      <div className="coinsCointainer">
+        {
+          filteredCoins.length > 0 && !loading ? filteredCoins.map(coin =>(
+            <Coin key={coin.id} coin={coin} />
+          )) : <Fragment>Loading</Fragment>
+        }
+
+      </div>
     </div>
   );
 }
